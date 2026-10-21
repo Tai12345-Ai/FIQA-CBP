@@ -1,14 +1,26 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+.ipynb_checkpoints/
 .venv/
 venv/
+.env
+.env.*
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.log
+
+# Generated experiment artifacts / model files
 outputs/*
 !outputs/.gitkeep
 data/
 checkpoints/
+wandb/
 *.npz
 *.npy
 *.pt
 *.pth
 *.onnx
+*.zip

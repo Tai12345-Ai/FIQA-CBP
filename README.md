@@ -1,4 +1,4 @@
-# CBP_full_extract
+# FIQA-CBP
 
 Research implementation of **Certified Behavioral Partitions (CBP)** for
 one-sided, evidence-aware Face Image Quality Assessment (FIQA) and face
@@ -91,7 +91,7 @@ and performs independent identity-level certification.
 ## Repository layout
 
 ```text
-CBP_full_extract/
+FIQA-CBP/
 ├── cbp/
 │   ├── analysis/          # E1 / mean-matched evidence diagnostics
 │   ├── baselines/         # scalar, dense and continuous controls
@@ -112,6 +112,8 @@ CBP_full_extract/
 │   ├── synthetic.yaml
 │   ├── pilot.yaml
 │   └── full.yaml
+├── colab/
+│   └── CBP_CFP_Core_Feasibility_Pilot.ipynb
 ├── docs/
 ├── scripts/
 ├── tests/
@@ -124,9 +126,23 @@ CBP_full_extract/
 Python 3.10 or later is required.
 
 ```bash
-cd "D:\Research\FIQA-CBP\CBP_full_extract"
+git clone https://github.com/Tai12345-Ai/FIQA-CBP.git
+cd FIQA-CBP
 python -m venv .venv
-.venv\Scripts\activate
+```
+
+Windows PowerShell:
+
+```powershell
+.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+python -m pip install -e ".[dev]"
+```
+
+Linux/macOS/Colab:
+
+```bash
+source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e ".[dev]"
 ```
@@ -185,6 +201,23 @@ python scripts/run_full_experiment.py --config configs/synthetic.yaml
 
 Synthetic data validates code paths and controlled mechanisms. It is not face
 recognition evidence.
+
+## Recommended repository and storage workflow
+
+Keep **source code** in this GitHub repository and keep large/restricted artifacts
+outside Git:
+
+- GitHub: source, configs, tests, docs, notebooks;
+- Google Drive or equivalent storage: raw datasets, embedding caches, checkpoints
+  and experiment outputs;
+- Colab local disk: temporary cloned source and extracted image files for fast I/O.
+
+For the current CFP pilot, use `colab/CBP_CFP_Core_Feasibility_Pilot.ipynb`.
+The notebook clones this repository, reads the CFP ZIP from Drive, stores
+embeddings/results back to Drive, and prints the exact Git commit SHA used.
+
+Do not commit face datasets, embeddings, model checkpoints, tokens, or generated
+experiment artifacts to this repository.
 
 ## Real-face workflow
 
