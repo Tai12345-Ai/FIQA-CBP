@@ -1,0 +1,49 @@
+seed: 13
+embedding_npz: data/smoke_embeddings.npz
+output_dir: outputs/smoke
+n_states: 12
+k_candidates: [3, 4]
+spectral_dim: 3
+min_captures_per_identity: 2
+max_identities_per_split: 20
+max_fit_identity_pairs: null
+router_epochs: 3
+router_batch_size: 32
+router_lr: 0.001
+router_hidden: [16]
+router_dropout: 0.0
+router_patience: 3
+phenomenon_permutations: 10
+phenomenon_match_quantile: 0.50
+phenomenon_min_gap_ratio: -1.0
+phenomenon_max_mean_match_distance: 10.0
+phenomenon_min_pairs: 2
+bootstrap_repetitions: 20
+run_continuous_baseline: true
+continuous_bottleneck_dim: 3
+continuous_epochs: 5
+run_image_neural_baseline: true
+image_policy_epochs: 5
+image_policy_lr: 0.001
+image_policy_hidden: [16]
+image_policy_dropout: 0.0
+image_policy_max_identity_pairs: null
+certification_delta: 0.20
+certify_candidate_family: false
+gate_numerical_tolerance: 1.0e-8
+gate_decision_min_yield_gain: -1.0  # smoke only; not a scientific gate
+splits:
+  repr: 0.30
+  fit: 0.25
+  dev: 0.15
+  cal: 0.15
+  test: 0.15
+contexts:
+  - name: smoke
+    target_fmr: 0.20
+    coverage_low: 0.10
+    coverage_high: 1.0
+    rho: 0.20
+    reserve: 0.0
+    identity_budget: 10
+    max_impostor_pairs_for_threshold: 10000

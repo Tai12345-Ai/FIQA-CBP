@@ -1,0 +1,54 @@
+# Replace embedding_npz with a frozen FR embedding cache.
+seed: 20261021
+embedding_npz: data/arcface_embeddings.npz
+output_dir: outputs/pilot_arcface
+n_states: 64
+k_candidates: [4, 8, 16]
+spectral_dim: 8
+min_captures_per_identity: 2
+max_identities_per_split: 150
+max_fit_identity_pairs: null
+router_epochs: 80
+router_batch_size: 256
+router_lr: 0.001
+router_hidden: [256, 128]
+router_dropout: 0.10
+router_patience: 15
+phenomenon_permutations: 1000
+phenomenon_match_quantile: 0.25
+bootstrap_repetitions: 1000
+run_continuous_baseline: true
+continuous_bottleneck_dim: 8
+continuous_epochs: 1000
+run_image_neural_baseline: true
+image_policy_epochs: 500
+image_policy_lr: 0.001
+image_policy_hidden: [256, 128]
+image_policy_dropout: 0.10
+image_policy_max_identity_pairs: null
+certification_delta: 0.05
+gate_numerical_tolerance: 1.0e-8
+gate_decision_min_yield_gain: 0.0  # replace with a preregistered practical margin
+splits:
+  repr: 0.30
+  fit: 0.25
+  dev: 0.15
+  cal: 0.15
+  test: 0.15
+contexts:
+  - name: fmr_1e-2
+    target_fmr: 0.01
+    coverage_low: 0.50
+    coverage_high: 1.0
+    rho: 1.0
+    reserve: 0.0
+    identity_budget: null
+    max_impostor_pairs_for_threshold: 1000000
+  - name: fmr_1e-3
+    target_fmr: 0.001
+    coverage_low: 0.25
+    coverage_high: 1.0
+    rho: 1.0
+    reserve: 0.0
+    identity_budget: null
+    max_impostor_pairs_for_threshold: 2000000

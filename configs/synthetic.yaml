@@ -1,0 +1,53 @@
+seed: 20261021
+embedding_npz: data/synthetic_embeddings.npz
+output_dir: outputs/synthetic_full
+n_states: 48
+k_candidates: [4, 8, 12]
+spectral_dim: 6
+min_captures_per_identity: 2
+max_identities_per_split: 60
+max_fit_identity_pairs: null
+router_epochs: 40
+router_batch_size: 128
+router_lr: 0.001
+router_hidden: [128, 64]
+router_dropout: 0.10
+router_patience: 10
+phenomenon_permutations: 250
+phenomenon_match_quantile: 0.30
+bootstrap_repetitions: 250
+run_continuous_baseline: true
+continuous_bottleneck_dim: 6
+continuous_epochs: 300
+run_image_neural_baseline: true
+image_policy_epochs: 100
+image_policy_lr: 0.001
+image_policy_hidden: [64, 32]
+image_policy_dropout: 0.10
+image_policy_max_identity_pairs: null
+certification_delta: 0.05
+gate_numerical_tolerance: 1.0e-8
+gate_decision_min_yield_gain: 0.0
+splits:
+  repr: 0.30
+  fit: 0.25
+  dev: 0.15
+  cal: 0.15
+  test: 0.15
+contexts:
+  - name: fmr_5e-2
+    target_fmr: 0.05
+    coverage_low: 0.40
+    coverage_high: 1.0
+    rho: 1.0
+    reserve: 0.0
+    identity_budget: 50
+    max_impostor_pairs_for_threshold: 200000
+  - name: fmr_1e-2
+    target_fmr: 0.01
+    coverage_low: 0.20
+    coverage_high: 1.0
+    rho: 1.0
+    reserve: 0.0
+    identity_budget: 50
+    max_impostor_pairs_for_threshold: 500000
