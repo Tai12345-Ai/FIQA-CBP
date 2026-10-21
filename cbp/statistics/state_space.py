@@ -42,6 +42,20 @@ def build_state_space(
     )
     labels = km.fit_predict(z)
     centroids = km.cluster_centers_
+
+    # MiniBatchKMeans can leave one or more cluster centers with no assigned
+    # samples. Those states have exactly zero empirical probability and must
+    # not enter the finite-state operators, whose weighted adjoint requires
+    # strictly positive state mass. Remove empty states and remap labels to a
+    # contiguous range before estimating moments.
+    occupied = np.unique(labels)
+    if len(occupied) < n_states:
+        remap = np.full(n_states, -1, dtype=np.int64)
+        remap[occupied] = np.arange(len(occupied), dtype=np.int64)
+        labels = remap[labels]
+        centroids = centroids[occupied]
+        n_states = len(occupied)
+
     weights = identity_balanced_sample_weights(identity_ids)
     p = np.bincount(labels, weights=weights, minlength=n_states).astype(np.float64)
     p = p / p.sum()
