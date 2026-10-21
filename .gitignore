@@ -13,11 +13,11 @@ Thumbs.db
 *.log
 
 # Generated experiment artifacts / model files
-outputs/*
+/outputs/*
 !outputs/.gitkeep
-data/
-checkpoints/
-wandb/
+/data/
+/checkpoints/
+/wandb/
 *.npz
 *.npy
 *.pt
