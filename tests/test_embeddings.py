@@ -21,9 +21,10 @@ class _FakeApp:
         return list(self.faces)
 
 
-def _extractor_with_faces(faces):
+def _extractor_with_faces(faces, padding_ratio=0.0):
     extractor = InsightFaceExtractor.__new__(InsightFaceExtractor)
     extractor.app = _FakeApp(faces)
+    extractor.padding_ratio = float(padding_ratio)
     extractor._read_bgr = lambda path: np.zeros((240, 320, 3), dtype=np.uint8)
     return extractor
 
@@ -36,6 +37,19 @@ def test_native_pipeline_passes_original_resolution_to_faceanalysis():
     assert extractor.app.images[0].shape == (240, 320, 3)
     assert features.shape == (1, 2)
     assert np.allclose(features[0], [0.6, 0.8])
+
+
+def test_native_pipeline_applies_replicate_padding_before_detection():
+    extractor = _extractor_with_faces(
+        [_FakeFace(0.9, [3.0, 4.0])],
+        padding_ratio=0.25,
+    )
+
+    extractor.extract(["face.jpg"])
+
+    # 25% is added independently on every side:
+    # H = 240 + 2*60 = 360, W = 320 + 2*80 = 480.
+    assert extractor.app.images[0].shape == (360, 480, 3)
 
 
 def test_native_pipeline_selects_highest_detection_score():

@@ -97,11 +97,12 @@ class FaceDetectionError(RuntimeError):
 class InsightFaceExtractor:
     """Frozen native InsightFace detector -> alignment -> recognition pipeline.
 
-    Images are decoded with OpenCV in BGR at their original resolution and are
-    passed directly to FaceAnalysis.get. No project-side resize, normalization,
-    RGB conversion, or custom alignment occurs before detection. InsightFace
-    therefore owns detection, landmark-based face alignment, and recognition
-    preprocessing end-to-end.
+    Images are decoded with OpenCV in BGR at their original resolution. An
+    optional deterministic replicate-border padding can be added before
+    FaceAnalysis.get to restore context for tightly cropped face datasets such
+    as CFP. No project-side resize, normalization, RGB conversion, or custom
+    alignment occurs. InsightFace still owns detection, landmark-based face
+    alignment, and recognition preprocessing end-to-end.
     """
 
     def __init__(
@@ -111,6 +112,7 @@ class InsightFaceExtractor:
         ctx_id: int = 0,
         det_size: tuple[int, int] = (640, 640),
         det_thresh: float = 0.5,
+        padding_ratio: float = 0.0,
     ):
         try:
             from insightface.app import FaceAnalysis
@@ -123,6 +125,9 @@ class InsightFaceExtractor:
         self.ctx_id = int(ctx_id)
         self.det_size = tuple(int(v) for v in det_size)
         self.det_thresh = float(det_thresh)
+        self.padding_ratio = float(padding_ratio)
+        if not 0.0 <= self.padding_ratio <= 1.0:
+            raise ValueError("padding_ratio must be in [0, 1]")
 
         self.app = FaceAnalysis(name=self.model_name, providers=providers)
         self.recognizer = self.app.models.get("recognition")
@@ -154,6 +159,27 @@ class InsightFaceExtractor:
             raise ImageDecodeError(f"could not decode image: {path}")
         return image
 
+    def _pad_for_detection(self, image: np.ndarray) -> np.ndarray:
+        if self.padding_ratio == 0.0:
+            return image
+
+        try:
+            import cv2
+        except ImportError as e:
+            raise ImportError("opencv-python is required for InsightFace extraction") from e
+
+        height, width = image.shape[:2]
+        pad_y = int(height * self.padding_ratio)
+        pad_x = int(width * self.padding_ratio)
+        return cv2.copyMakeBorder(
+            image,
+            pad_y,
+            pad_y,
+            pad_x,
+            pad_x,
+            borderType=cv2.BORDER_REPLICATE,
+        )
+
     def extract(self, image_paths: list[str]) -> np.ndarray:
         if not image_paths:
             raise ValueError("image_paths must not be empty")
@@ -161,7 +187,8 @@ class InsightFaceExtractor:
         out = []
         for path in image_paths:
             image = self._read_bgr(path)
-            faces = self.app.get(image)
+            detector_image = self._pad_for_detection(image)
+            faces = self.app.get(detector_image)
             if not faces:
                 raise FaceDetectionError(f"no face detected: {path}")
             face = max(faces, key=lambda f: float(f.det_score))

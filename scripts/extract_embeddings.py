@@ -66,6 +66,15 @@ def main() -> None:
     parser.add_argument("--det-size", type=int, nargs=2, default=(640, 640))
     parser.add_argument("--det-thresh", type=float, default=0.5)
     parser.add_argument(
+        "--padding-ratio",
+        type=float,
+        default=0.0,
+        help=(
+            "replicate-border padding added on each side before InsightFace detection; "
+            "0.25 means 25%% of image width/height per side"
+        ),
+    )
+    parser.add_argument(
         "--min-success-fraction",
         type=float,
         default=0.0,
@@ -84,6 +93,8 @@ def main() -> None:
     manifest = FaceManifest.from_csv(args.manifest).frame
     if not 0.0 <= args.min_success_fraction <= 1.0:
         raise ValueError("--min-success-fraction must be in [0, 1]")
+    if not 0.0 <= args.padding_ratio <= 1.0:
+        raise ValueError("--padding-ratio must be in [0, 1]")
 
     extractor = InsightFaceExtractor(
         args.model,
@@ -91,6 +102,7 @@ def main() -> None:
         ctx_id=args.ctx_id,
         det_size=tuple(args.det_size),
         det_thresh=args.det_thresh,
+        padding_ratio=args.padding_ratio,
     )
     embeddings = []
     keep_indices = []
@@ -231,6 +243,10 @@ def main() -> None:
             "image_decode": "OpenCV IMREAD_COLOR, original-resolution BGR",
             "pre_detector_resize": None,
             "pre_detector_normalization": None,
+            "pre_detector_padding_ratio": args.padding_ratio,
+            "pre_detector_padding_mode": (
+                "opencv_BORDER_REPLICATE" if args.padding_ratio > 0 else None
+            ),
             "alignment": "InsightFace FaceAnalysis internal landmark-based alignment",
             "package_versions": package_versions,
             "model_file_hashes": model_hashes,
@@ -263,7 +279,7 @@ def main() -> None:
         f"saved {samples_succeeded}/{samples_expected} embeddings "
         f"({success_fraction:.2%}) to {args.output}; "
         f"identities={identities_succeeded}; failures={samples_failed}; "
-        f"metadata={metadata_path}"
+        f"padding_ratio={args.padding_ratio:.3f}; metadata={metadata_path}"
     )
     for view, stats in view_audit.items():
         detection_rate = stats["detection_rate"]
